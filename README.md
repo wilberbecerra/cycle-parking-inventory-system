@@ -1,4 +1,4 @@
-# CycleParking: Access Control & Ticket Inventory System 🚲
+# CyclePark: Access Control & Ticket Inventory System 🚲
 
 **CyclePark** es una solución integral de software diseñada para la gestión operativa y seguridad de estacionamientos de vehículos menores (bicicletas y scooters). El sistema digitaliza el flujo de ingresos, control de inventario de tickets activos y protocolos de salida segura.
 
