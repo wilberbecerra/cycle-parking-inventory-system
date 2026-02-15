@@ -1,0 +1,18 @@
+# Dependencias de Node (pesadas)
+node_modules/
+npm-debug.log*
+
+# Configuración sensible (Seguridad)
+.env
+.env.local
+
+# Archivos de base de datos o temporales
+*.log
+dist/
+build/
+
+# Archivos de editores
+.vscode/
+.idea/
+*.suo
+*.user

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acceso - Parking Login</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+  <body>
+    <div class="login-container">
+      <div id="login-card" class="login-card">
+        <div class="login-header">
+          <img src="../assets/logo-login.png" alt="Logo" class="logo" />
+          <h2>Bienvenido</h2>
+          <p>Ingrese sus credenciales</p>
+        </div>
+        <form id="login-form">
+          <div class="input-group">
+            <label>Usuario</label>
+            <input
+              type="text"
+              id="username"
+              placeholder="ej. admin_temporal"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label>Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="••••••"
+              required
+            />
+          </div>
+          <button type="submit" class="btn-login">Ingresar</button>
+        </form>
+      </div>
+
+      <div
+        id="session-card"
+        class="login-card"
+        style="display: none; text-align: center"
+      >
+        <div class="login-header">
+          <img
+            src="../assets/logo-login.png"
+            alt="Logo"
+            class="logo"
+            style="width: 80px; margin-bottom: 10px"
+          />
+          <h3 style="color: #10b981; margin: 0">¡Sesión Activa!</h3>
+        </div>
+
+        <div
+          style="
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid #e2e8f0;
+          "
+        >
+          <p
+            style="
+              margin: 0;
+              color: #64748b;
+              font-size: 0.9rem;
+              font-weight: 500;
+            "
+          >
+            Usuario conectado actualmente:
+          </p>
+          <h2
+            id="active-user"
+            style="margin: 5px 0; color: #1e293b; font-size: 1.5rem"
+          >
+            ...
+          </h2>
+        </div>
+
+        <button
+          onclick="continuarSesion()"
+          class="btn-login"
+          style="margin-bottom: 15px; background-color: #10b981"
+        >
+          ➡ Continuar Trabajando
+        </button>
+
+        <button
+          onclick="cambiarCuenta()"
+          style="
+            width: 100%;
+            padding: 12px;
+            background: white;
+            border: 2px solid #ef4444;
+            color: #ef4444;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+          "
+          onmouseover="this.style.background = '#fff1f2'"
+          onmouseout="this.style.background = 'white'"
+        >
+          🔒 Cerrar y Cambiar (Corte X)
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://127.0.0.1:3000/api/auth/login";
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const user = localStorage.getItem("usuarioNombre");
+        // Verificamos que no sea null ni la palabra "undefined"
+        if (user && user !== "undefined") {
+          document.getElementById("login-card").style.display = "none";
+          document.getElementById("session-card").style.display = "block";
+          document.getElementById("active-user").innerText = user;
+        }
+      });
+
+      function continuarSesion() {
+        window.location.href = "dashboard.html";
+      }
+
+      function cambiarCuenta() {
+        if (
+          confirm("⚠️ ¿Desea cerrar la sesión actual para cambiar de usuario?")
+        ) {
+          // Limpiamos todo antes de ir al dashboard para forzar el corte
+          // Pero enviamos la señal de forceCorteX
+          window.location.href = "dashboard.html?forceCorteX=true";
+        }
+      }
+
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const user = document.getElementById("username").value;
+          const pass = document.getElementById("password").value;
+
+          try {
+            const res = await fetch(API_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username: user, password: pass }),
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+              const u = data.usuario;
+
+              // --- CORRECCIÓN AQUÍ ---
+              // Buscamos el dato correcto (Backend puede mandar mayúsculas o minúsculas)
+              const idReal = u.id || u.ID_USUARIO || u.ID;
+              const nombreReal = u.nombre || u.NOMBRE_EMPLEADO || u.NOMBRE;
+              const rolReal = u.rol || u.ROL;
+
+              // Guardamos en LocalStorage
+              localStorage.setItem("usuarioId", idReal);
+              localStorage.setItem("usuarioNombre", nombreReal);
+              localStorage.setItem("usuarioRol", rolReal);
+              localStorage.setItem("inicioTurno", new Date().toISOString());
+
+              window.location.href = "dashboard.html";
+            } else {
+              alert("❌ " + (data.mensaje || "Credenciales incorrectas"));
+            }
+          } catch (error) {
+            console.error(error);
+            alert("Error de conexión con el servidor");
+          }
+        });
+    </script>
+  </body>
+</html>
