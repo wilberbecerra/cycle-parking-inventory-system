@@ -40,7 +40,13 @@ function formatearHora(isoString) {
     if (!isoString) return "--:--";
     try {
         const fecha = new Date(isoString);
-        return fecha.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        // AGREGAMOS timeZone: 'UTC' para que no reste las 5 horas de Perú
+        return fecha.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: true, 
+            timeZone: 'UTC'  // <--- ¡ESTA ES LA CLAVE!
+        });
     } catch (e) { return isoString; }
 }
 
