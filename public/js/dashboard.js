@@ -277,13 +277,22 @@ const id = document.getElementById("loss-id-ticket").value;
 
 /* --- 4. EXPORTACIÓN Y CORTES --- */
 async function ejecutarCorte(tipo) {
-    // 1. Confirmación de Seguridad
-    if (!confirm(`⚠️ ¿Está seguro de realizar el CORTE ${tipo}?\n\nEsta acción generará los reportes y CERRARÁ la sesión actual.`)) {
-        return;
+    // 1. Mensajes personalizados según el tipo
+    let mensaje = "";
+    let tituloReporte = "";
+    
+    if (tipo === 'X') {
+        mensaje = "⚠️ ¿Realizar CORTE PARCIAL (X)?\n\nSe generará el reporte del turno actual y se cerrará su sesión.";
+        tituloReporte = "REPORTE DE OPERACIONES - X (PARCIAL)";
+    } else {
+        mensaje = "🛑 ¿Realizar CIERRE DE JORNADA (Z)?\n\nEsta acción consolida TODA la operación del día (incluyendo otros turnos).\nLos vehículos en CUSTODIA se mantendrán para mañana.";
+        tituloReporte = "CIERRE DE JORNADA FISCAL - Z";
     }
 
+    if (!confirm(mensaje)) return;
+
     try {
-        // 2. Recopilar Datos (Hacemos 2 peticiones en paralelo para velocidad)
+        // 2. Obtener Datos
         const [resActivos, resHistorial] = await Promise.all([
             fetch('http://127.0.0.1:3000/api/tickets/activos'),
             fetch('http://127.0.0.1:3000/api/clientes/hoy')
@@ -292,285 +301,173 @@ async function ejecutarCorte(tipo) {
         const activos = await resActivos.json();
         const historial = await resHistorial.json();
 
-        // 3. Preparar Metadatos de la Sesión
+        // 3. Calcular Datos de la Sesión
         const fechaHoy = new Date();
-        const inicioTurnoStr = localStorage.getItem("horaInicioTurno") || fechaHoy.toISOString(); // Si no hay, usa hora actual
+        // Si es Z, asumimos inicio del día (00:00) para el reporte global
+        const inicioTurnoStr = (tipo === 'Z') ? 
+            new Date(fechaHoy.setHours(0,0,0,0)).toISOString() : 
+            (localStorage.getItem("horaInicioTurno") || fechaHoy.toISOString());
+            
         const inicioTurno = new Date(inicioTurnoStr);
-        
-        // Calcular Duración
-        const diffMs = fechaHoy - inicioTurno;
+        const diffMs = new Date() - inicioTurno; // Diferencia real
         const diffHrs = Math.floor((diffMs % 86400000) / 3600000);
         const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
-        
+
+        // Detectar si hubo múltiples operadores (Simulado visualmente)
+        // Nota: Para que salgan los nombres reales de OTROS, el backend debería enviarlos.
+        // Por ahora, pondremos que el reporte incluye "Turno General".
+        const responsable = (tipo === 'Z') ? 
+            `${localStorage.getItem("usuarioNombre")} (Y ANTERIORES)` : 
+            localStorage.getItem("usuarioNombre");
+
         const datosSesion = {
+            titulo: tituloReporte, // Título dinámico
             tipo: tipo,
-            responsable: localStorage.getItem("usuarioNombre") || "Admin",
-            fecha: fechaHoy.toLocaleDateString('es-PE'),
-            horaCierre: fechaHoy.toLocaleTimeString('en-US'),
+            responsable: responsable,
+            fecha: new Date().toLocaleDateString('es-PE'),
+            horaCierre: new Date().toLocaleTimeString('en-US'),
             horaInicio: inicioTurno.toLocaleTimeString('en-US'),
-            duracion: `${diffHrs}h ${diffMins}m`
+            duracion: (tipo === 'Z') ? "24h (Jornada Completa)" : `${diffHrs}h ${diffMins}m`
         };
 
         // 4. Generar Reportes
         generarPDFProfesional(datosSesion, activos, historial);
         generarExcelProfesional(datosSesion, activos, historial);
 
-        // 5. Cerrar Sesión (Pequeño delay para que descarguen los archivos)
+        // 5. Cerrar Sesión
         setTimeout(() => {
-            alert("✅ Corte generado correctamente. Cerrando sesión...");
+            alert(`✅ ${tipo === 'Z' ? "Cierre Z" : "Corte X"} generado exitosamente.`);
             localStorage.clear();
             window.location.href = "login.html";
         }, 1500);
 
-    } catch (e) {
-        console.error(e);
-        alert("❌ Error al generar el corte. Revise la conexión.");
-    }
+    } catch (e) { console.error(e); alert("❌ Error al generar reporte."); }
 }
 
+/* --- GENERADOR PDF (Adaptado para Z) --- */
 function generarPDFProfesional(sesion, activos, historial) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    // COLORES CORPORATIVOS
-    const colorOscuro = [30, 41, 59];  // Azul noche
-    const colorVerde = [22, 163, 74];  // Verde éxito
-    const colorGris = [100, 116, 139]; // Gris texto
-
-    // 1. ENCABEZADO PRINCIPAL (Bloque Oscuro)
-    doc.setFillColor(...colorOscuro);
+    // Si es Z, usamos un ROJO OSCURO para diferenciar. Si es X, AZUL.
+    const colorCabecera = (sesion.tipo === 'Z') ? [127, 29, 29] : [30, 41, 59]; 
+    
+    // 1. Encabezado
+    doc.setFillColor(...colorCabecera);
     doc.rect(0, 0, 210, 40, 'F');
-    
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
+    doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text(`REPORTE DE OPERACIONES - ${sesion.tipo}`, 105, 18, null, null, "center");
-    
+    doc.text(sesion.titulo, 105, 18, null, null, "center");
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text("CONTROL DE RELEVO Y AUDITORÍA DE TURNO", 105, 26, null, null, "center");
+    doc.text("AUDITORÍA DE ESTACIONAMIENTO Y CONTROL DE INVENTARIO", 105, 26, null, null, "center");
 
-    // 2. DATOS DE LA SESIÓN (Recuadro gris claro)
+    // 2. Datos Sesión
     doc.setFillColor(241, 245, 249);
     doc.rect(14, 45, 182, 25, 'F');
-    
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.text("DATOS DE LA SESIÓN", 20, 53);
+    doc.text("RESUMEN DEL PERIODO", 20, 53);
     
-    doc.setTextColor(...colorVerde);
-    doc.setFontSize(10);
-    doc.text(`DURACIÓN: ${sesion.duracion}`, 150, 53);
-
-    doc.setTextColor(50, 50, 50);
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    // Columna Izquierda
     doc.text(`RESPONSABLE: ${sesion.responsable.toUpperCase()}`, 20, 60);
-    doc.text(`INICIO: ${sesion.fecha}, ${sesion.horaInicio}`, 20, 66);
-    // Columna Derecha
-    doc.text(`FECHA: ${sesion.fecha}, ${sesion.horaCierre}`, 120, 60);
-    doc.text(`FIN: ${sesion.fecha}, ${sesion.horaCierre}`, 120, 66);
+    doc.text(`DESDE: ${sesion.fecha}, ${sesion.horaInicio}`, 20, 66);
+    doc.text(`HASTA: ${sesion.fecha}, ${sesion.horaCierre}`, 120, 66);
+    doc.text(`TIEMPO OPERATIVO: ${sesion.duracion}`, 120, 60);
 
-    // 3. SECCIÓN A: INVENTARIO EN CUSTODIA (Tabla Verde)
+    // 3. Tablas (Igual que antes)
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(0, 0, 0);
-    doc.text(`A. INVENTARIO EN CUSTODIA (${activos.length})`, 14, 80);
+    doc.text(`A. INVENTARIO EN CUSTODIA (Pasa a mañana: ${activos.length})`, 14, 80);
 
-    const columnasActivos = [['TICKET', 'PROPIETARIO', 'VEHÍCULO', 'INGRESO']];
-    const dataActivos = activos.map(t => [
-        t.CODIGO_CORRELATIVO,
-        t.Cliente,
-        t.TIPO_VEHICULO,
-        formatearHora(t.HORA_INGRESO)
-    ]);
-
+    const dataActivos = activos.map(t => [t.CODIGO_CORRELATIVO, t.Cliente, t.TIPO_VEHICULO, formatearHora(t.HORA_INGRESO)]);
     doc.autoTable({
         startY: 85,
-        head: columnasActivos,
+        head: [['TICKET', 'PROPIETARIO', 'VEHÍCULO', 'INGRESO']],
         body: dataActivos,
         theme: 'striped',
-        headStyles: { fillColor: colorVerde, textColor: 255, fontStyle: 'bold' },
-        styles: { fontSize: 9, cellPadding: 3 }
+        headStyles: { fillColor: [22, 163, 74] }, // Verde
+        styles: { fontSize: 9 }
     });
 
-    // 4. SECCIÓN B: FLUJO DE MOVIMIENTOS (Tabla Gris)
     let finalY = doc.lastAutoTable.finalY + 15;
+    doc.text(`B. HISTORIAL TOTAL DEL DÍA (${historial.length} movimientos)`, 14, finalY);
     
-    doc.setFontSize(11);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`B. FLUJO DE MOVIMIENTOS HOY (${historial.length})`, 14, finalY);
-
-    const columnasHistorial = [['ESTADO', 'TICKET', 'CLIENTE', 'ENTRADA', 'SALIDA']];
     const dataHistorial = historial.map(t => [
-        t.ESTADO,
-        t.CODIGO_CORRELATIVO,
-        t.Cliente,
-        formatearHora(t.HORA_INGRESO),
-        t.HORA_SALIDA ? formatearHora(t.HORA_SALIDA) : '--'
+        t.ESTADO, t.CODIGO_CORRELATIVO, t.Cliente, 
+        formatearHora(t.HORA_INGRESO), t.HORA_SALIDA ? formatearHora(t.HORA_SALIDA) : '--'
     ]);
-
     doc.autoTable({
         startY: finalY + 5,
-        head: columnasHistorial,
+        head: [['ESTADO', 'TICKET', 'CLIENTE', 'ENTRADA', 'SALIDA']],
         body: dataHistorial,
         theme: 'striped',
-        headStyles: { fillColor: [71, 85, 105], textColor: 255 }, // Gris Oscuro
-        styles: { fontSize: 9 },
-        columnStyles: { 0: { fontStyle: 'bold' } } // Negrita en Estado
+        headStyles: { fillColor: [71, 85, 105] }, // Gris
+        styles: { fontSize: 9 }
     });
 
-    // 5. FIRMAS AL PIE DE PÁGINA
-    const pageHeight = doc.internal.pageSize.height;
-    const yFirmas = pageHeight - 30;
-
+    // Pie de página con firma
+    const yFirmas = doc.internal.pageSize.height - 30;
     doc.setDrawColor(150);
-    doc.line(30, yFirmas, 90, yFirmas);  // Línea Izquierda
-    doc.line(120, yFirmas, 180, yFirmas); // Línea Derecha
-
+    doc.line(70, yFirmas, 140, yFirmas);
     doc.setFontSize(8);
-    doc.setTextColor(100);
-    doc.text("ENTREGUÉ CONFORME", 60, yFirmas + 5, null, null, "center");
-    doc.text(`(${sesion.responsable})`, 60, yFirmas + 10, null, null, "center");
+    doc.text("CONFORMIDAD DE CIERRE", 105, yFirmas + 5, null, null, "center");
+    doc.text(sesion.responsable, 105, yFirmas + 10, null, null, "center");
 
-    doc.text("RECIBÍ CONFORME", 150, yFirmas + 5, null, null, "center");
-    doc.text("(Próximo Turno)", 150, yFirmas + 10, null, null, "center");
-
-    // Guardar PDF
-    doc.save(`Corte_${sesion.tipo}_${sesion.fecha.replace(/\//g,'-')}.pdf`);
+    doc.save(`${sesion.tipo}_${sesion.fecha.replace(/\//g,'-')}.pdf`);
 }
 
-/* --- GENERADOR DE EXCEL (Estructurado) --- */
-/* --- GENERADOR DE EXCEL CON ESTILOS (Requiere xlsx-js-style) --- */
+/* --- GENERADOR EXCEL (Adaptado) --- */
 function generarExcelProfesional(sesion, activos, historial) {
     const wb = XLSX.utils.book_new();
     
-    // 1. DEFINIR ESTILOS
-    const stTitulo = { 
-        font: { bold: true, color: { rgb: "FFFFFF" }, sz: 16 }, 
-        fill: { fgColor: { rgb: "1E293B" } }, // Azul oscuro
-        alignment: { horizontal: "center" }
-    };
-    const stSubtitulo = { 
-        font: { italic: true, color: { rgb: "333333" } }, 
-        alignment: { horizontal: "center" }
-    };
-    const stNegrita = { font: { bold: true } };
-    
-    // Estilos de Tablas
-    const stHeadVerde = { 
-        font: { bold: true, color: { rgb: "FFFFFF" } }, 
-        fill: { fgColor: { rgb: "16A34A" } }, // Verde éxito
-        alignment: { horizontal: "center" },
-        border: { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} }
-    };
-    const stHeadGris = { 
-        font: { bold: true, color: { rgb: "FFFFFF" } }, 
-        fill: { fgColor: { rgb: "475569" } }, // Gris oscuro
-        alignment: { horizontal: "center" },
-        border: { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} }
-    };
-    const stBorde = {
-        border: { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} }
-    };
+    // Estilos (Rojo para Z, Azul para X)
+    const colorBg = (sesion.tipo === 'Z') ? "7F1D1D" : "1E293B";
+    const stTitulo = { font: { bold: true, color: { rgb: "FFFFFF" }, sz: 14 }, fill: { fgColor: { rgb: colorBg } }, alignment: { horizontal: "center" } };
+    const stHead = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "475569" } }, border: { top: {style:'thin'}, bottom: {style:'thin'} } };
+    const stCelda = { border: { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} } };
 
-    // 2. CONSTRUIR LOS DATOS (Fila por fila)
     let wsData = [
-        [{ v: `REPORTE DE OPERACIONES - ${sesion.tipo}`, s: stTitulo }], // A1
-        [{ v: "CONTROL DE AUDITORÍA Y RELEVO", s: stSubtitulo }],      // A2
-        [], // A3 (Espacio)
-        // Datos Sesión
+        [{ v: sesion.titulo, s: stTitulo }],
+        [],
+        [{ v: "RESPONSABLE:", s: {font:{bold:true}} }, { v: sesion.responsable }],
+        [{ v: "FECHA:", s: {font:{bold:true}} }, { v: sesion.fecha }],
+        [{ v: "DURACIÓN:", s: {font:{bold:true}} }, { v: sesion.duracion }],
+        [],
+        [{ v: `A. CUSTODIA (Pasan al día siguiente: ${activos.length})`, s: {font:{bold:true}} }],
         [
-            { v: "RESPONSABLE:", s: stNegrita }, { v: sesion.responsable }, 
-            {}, 
-            { v: "FECHA:", s: stNegrita }, { v: sesion.fecha }
-        ],
-        [
-            { v: "INICIO TURNO:", s: stNegrita }, { v: sesion.horaInicio }, 
-            {}, 
-            { v: "CIERRE:", s: stNegrita }, { v: sesion.horaCierre }
-        ],
-        [
-            { v: "DURACIÓN:", s: stNegrita }, { v: sesion.duracion }
-        ],
-        [], // Espacio
-        // Título A
-        [{ v: `A. INVENTARIO EN CUSTODIA (${activos.length})`, s: { font: { bold: true, sz: 12 } } }],
-        // Cabecera Tabla A
-        [
-            { v: "TICKET", s: stHeadVerde }, 
-            { v: "PROPIETARIO", s: stHeadVerde }, 
-            { v: "VEHÍCULO", s: stHeadVerde }, 
-            { v: "MARCA", s: stHeadVerde }, 
-            { v: "COLOR", s: stHeadVerde }, 
-            { v: "INGRESO", s: stHeadVerde }
+            {v:"TICKET",s:stHead}, {v:"PROPIETARIO",s:stHead}, {v:"VEHÍCULO",s:stHead}, {v:"INGRESO",s:stHead}
         ]
     ];
 
-    // Filas Tabla A
-    activos.forEach(t => {
-        wsData.push([
-            { v: t.CODIGO_CORRELATIVO, s: stBorde },
-            { v: t.Cliente, s: stBorde },
-            { v: t.TIPO_VEHICULO, s: stBorde },
-            { v: t.MARCA_BICI, s: stBorde },
-            { v: t.COLOR_BICI, s: stBorde },
-            { v: formatearHora(t.HORA_INGRESO), s: stBorde }
-        ]);
-    });
+    activos.forEach(t => wsData.push([
+        {v:t.CODIGO_CORRELATIVO,s:stCelda}, {v:t.Cliente,s:stCelda}, {v:t.TIPO_VEHICULO,s:stCelda}, {v:formatearHora(t.HORA_INGRESO),s:stCelda}
+    ]));
 
-    wsData.push([]); // Espacio
-
-    // Título B
-    wsData.push([{ v: `B. MOVIMIENTOS DEL TURNO (${historial.length})`, s: { font: { bold: true, sz: 12 } } }]);
-    
-    // Cabecera Tabla B
+    wsData.push([]);
+    wsData.push([{ v: `B. MOVIMIENTOS TOTALES (${historial.length})`, s: {font:{bold:true}} }]);
     wsData.push([
-        { v: "ESTADO", s: stHeadGris }, 
-        { v: "TICKET", s: stHeadGris }, 
-        { v: "CLIENTE", s: stHeadGris }, 
-        { v: "VEHÍCULO", s: stHeadGris }, 
-        { v: "ENTRADA", s: stHeadGris }, 
-        { v: "SALIDA", s: stHeadGris }
+        {v:"ESTADO",s:stHead}, {v:"TICKET",s:stHead}, {v:"CLIENTE",s:stHead}, {v:"ENTRADA",s:stHead}, {v:"SALIDA",s:stHead}
     ]);
 
-    // Filas Tabla B
-    historial.forEach(t => {
-        wsData.push([
-            { v: t.ESTADO, s: stBorde },
-            { v: t.CODIGO_CORRELATIVO, s: stBorde },
-            { v: t.Cliente, s: stBorde },
-            { v: t.TIPO_VEHICULO, s: stBorde },
-            { v: formatearHora(t.HORA_INGRESO), s: stBorde },
-            { v: t.HORA_SALIDA ? formatearHora(t.HORA_SALIDA) : '-', s: stBorde }
-        ]);
-    });
+    historial.forEach(t => wsData.push([
+        {v:t.ESTADO,s:stCelda}, {v:t.CODIGO_CORRELATIVO,s:stCelda}, {v:t.Cliente,s:stCelda}, 
+        {v:formatearHora(t.HORA_INGRESO),s:stCelda}, {v:t.HORA_SALIDA ? formatearHora(t.HORA_SALIDA):'-',s:stCelda}
+    ]));
 
-    // 3. CREAR HOJA Y AJUSTAR ANCHOS
     const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }]; // Merge Título
+    ws['!cols'] = [{wch:15}, {wch:25}, {wch:25}, {wch:15}, {wch:15}]; // Anchos
 
-    // Fusionar Celdas del Título (A1 hasta F1)
-    ws['!merges'] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, // Título principal
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } }  // Subtítulo
-    ];
-
-    // Ancho de Columnas
-    ws['!cols'] = [
-        { wch: 15 }, // A
-        { wch: 30 }, // B (Cliente ancho)
-        { wch: 20 }, // C
-        { wch: 15 }, // D
-        { wch: 15 }, // E
-        { wch: 15 }  // F
-    ];
-
-    XLSX.utils.book_append_sheet(wb, ws, `Corte ${sesion.tipo}`);
-    XLSX.writeFile(wb, `Corte_${sesion.tipo}_${sesion.fecha.replace(/\//g,'-')}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, "Reporte");
+    XLSX.writeFile(wb, `${sesion.tipo}_${sesion.fecha.replace(/\//g,'-')}.xlsx`);
 }
 
+// Botones del HTML
+function cerrarSesionBoton() { ejecutarCorte('X'); }
 // Botón de Cerrar Sesión manual (llama a corte X por defecto)
 function cerrarSesionBoton() {
     ejecutarCorte('X');
