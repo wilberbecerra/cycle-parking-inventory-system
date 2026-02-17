@@ -23,14 +23,6 @@ El flujo de trabajo replica fielmente la operación real de un centro comercial:
 
 ## 📸 Galería de la Interfaz (Screenshots)
 
-### 🔐 Seguridad y Administración
-| Acceso Seguro (Login) | Gestión de Usuarios (RBAC) |
-|:---------------------:|:--------------------------:|
-| ![Image_Alt](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/login.jpg) | ![Image_Alt](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/gesti%C3%B3n-usuarios.jpg) |
-| *Inicio de sesión con validación de credenciales* | *Panel exclusivo para **Administradores** (Crear/Borrar empleados)* |
-
-## 📸 Galería de la Interfaz (Screenshots)
-
 ### 🔐 Seguridad y Continuidad
 | Acceso Seguro (Login) | Sesión Bloqueada (Lock) | Gestión de Usuarios (RBAC) |
 |:---------------------:|:--------------------------:|:--------------------------:|
