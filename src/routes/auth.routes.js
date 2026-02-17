@@ -4,7 +4,7 @@ const sql = require('mssql');
 const bcrypt = require('bcryptjs'); 
 const { getConnection } = require('../config/db');
 
-// --- 1. LOGIN ---
+
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// --- 2. REGISTRAR (CORREGIDO PARA GUARDAR BIEN) ---
+
 router.post('/registrar', async (req, res) => {
     const { nombre, username, password, rol } = req.body;
     if (!nombre || !username || !password || !rol) return res.status(400).send("Faltan datos");
@@ -56,7 +56,7 @@ router.post('/registrar', async (req, res) => {
     }
 });
 
-// --- 3. LISTAR ---
+
 router.get('/listar', async (req, res) => {
     try {
         const pool = await getConnection();
@@ -65,7 +65,7 @@ router.get('/listar', async (req, res) => {
     } catch (e) { res.status(500).send("Error al listar"); }
 });
 
-// --- 4. ELIMINAR ---
+
 router.delete('/eliminar/:id', async (req, res) => {
     try {
         const pool = await getConnection();

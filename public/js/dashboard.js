@@ -1,51 +1,42 @@
-/* --- CyclePark: Access Control & Ticket Inventory --- */
-/* Presentation Layer Logic | Capa de Presentación */
 
-/* --- VARIABLES GLOBALES --- */
 let ticketsGlobal = [];
 let ticketsHistorial = [];
 let streamCamara = null;
 
-/* --- INICIALIZACIÓN --- */
+
 document.addEventListener("DOMContentLoaded", async () => {
-    
-    // 1. Validar Sesión y Saludo
+
     const nombre = localStorage.getItem("usuarioNombre");
-    if (!nombre || nombre === "undefined") { 
-        window.location.href = "login.html"; 
-        return; 
+    if (!nombre || nombre === "undefined") {
+        window.location.href = "login.html";
+        return;
     }
     document.getElementById("nombre-usuario").innerText = nombre;
 
-    /* --- NUEVO: GUARDAR HORA DE INICIO SI NO EXISTE --- */
-    // Esto es clave para que el PDF sepa cuándo empezó tu turno
     if (!localStorage.getItem("horaInicioTurno")) {
         localStorage.setItem("horaInicioTurno", new Date().toISOString());
     }
-    /* -------------------------------------------------- */
-    // 2. Cargar permisos de Administrador
+   
     const rol = localStorage.getItem("usuarioRol");
     if (rol === "Administrador") {
         const btn = document.getElementById("btn-admin-usuarios");
         if (btn) btn.style.display = "inline-block";
     }
 
-    // 3. Cargar datos iniciales
+    
     await cargarActivos();
     initIdentidad();
 });
 
-/* --- UTILIDADES --- */
+
 function formatearHora(isoString) {
     if (!isoString) return "--:--";
     try {
         const fecha = new Date(isoString);
-        // AGREGAMOS timeZone: 'UTC' para que no reste las 5 horas de Perú
         return fecha.toLocaleTimeString('en-US', { 
             hour: '2-digit', 
             minute: '2-digit', 
-            hour12: true, 
-            timeZone: 'UTC'  // <--- ¡ESTA ES LA CLAVE!
+            hour12: true 
         });
     } catch (e) { return isoString; }
 }
@@ -55,7 +46,7 @@ function limpiarId(id) {
     return id.toString().replace(':1', '').trim();
 }
 
-/* --- 1. RENDERIZADO DE TABLA (Activos) --- */
+
 function renderTabla(lista) {
     const tbody = document.getElementById("tickets-body");
     if (!tbody) return;
@@ -95,14 +86,9 @@ async function cargarActivos() {
     } catch (e) { console.error("Error al cargar activos:", e); }
 }
 
-/* --- 2. ACCIONES: CREAR, EDITAR, SALIDA --- */
-
-// A) CREAR TICKET (POST) - BLINDADO CONTRA ERRORES
 async function guardarTicket() {
     const rawId = localStorage.getItem("usuarioId");
-    const idUsuario = limpiarId(rawId); 
-    
-    // Limpiamos Inputs del formulario
+    const idUsuario = limpiarId(rawId);
     const dni = limpiarId(document.getElementById("documento-input").value);
     const nombre = document.getElementById("nombre-cliente").value.trim();
 
@@ -117,17 +103,17 @@ async function guardarTicket() {
         observaciones: document.getElementById("observaciones").value.trim(),
         id_usuario_ingreso: parseInt(idUsuario) || 1
     };
-    
+
     try {
-        const res = await fetch("http://127.0.0.1:3000/api/tickets", { 
-            method: "POST", 
-            headers: { "Content-Type": "application/json" }, 
-            body: JSON.stringify(body) 
+        const res = await fetch("http://127.0.0.1:3000/api/tickets", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
         });
-        
-        if (res.ok) { 
-            alert("✅ Ticket Registrado"); 
-            location.reload(); 
+
+        if (res.ok) {
+            alert("✅ Ticket Registrado");
+            location.reload();
         } else {
             const err = await res.text();
             alert("❌ Error del servidor: " + err);
@@ -135,7 +121,7 @@ async function guardarTicket() {
     } catch (e) { alert("❌ Error de conexión al crear ticket."); }
 }
 
-// B) EDITAR (PUT)
+
 function abrirEditar(id) {
     const t = ticketsGlobal.find(x => x.ID_TICKET == id);
     if (!t) return;
@@ -150,7 +136,7 @@ function abrirEditar(id) {
 async function guardarEdicion() {
     const id = document.getElementById("edit-id-ticket").value;
     const body = {
-        nombre_manual: document.getElementById("edit-nombre").value,
+        nombre_cliente: document.getElementById("edit-nombre").value,
         marca_bici: document.getElementById("edit-marca").value,
         color_bici: document.getElementById("edit-color").value,
         observaciones: document.getElementById("edit-obs").value
@@ -164,14 +150,28 @@ async function guardarEdicion() {
         });
 
         if (res.ok) {
-            alert("✅ Cambios guardados.");
+            alert("✅ Cambios guardados correctamente.");
             cerrarModal('modal-editar');
-            await cargarActivos(); 
+            
+            // VERIFICA EL NOMBRE DE TU FUNCIÓN AQUÍ:
+            // Si tu función para recargar la tabla se llama cargarTickets, usa esa.
+            if (typeof cargarTickets === 'function') {
+                await cargarTickets();
+            } else if (typeof cargarActivos === 'function') {
+                await cargarActivos();
+            }
+        } else {
+            const errorData = await res.text();
+            console.error("Error del servidor:", errorData);
+            alert("❌ El servidor rechazó el cambio: " + errorData);
         }
-    } catch (e) { alert("❌ Error al editar."); }
+    } catch (e) {
+        console.error("Error en la petición:", e);
+        alert("❌ Error de conexión al editar.");
+    }
 }
 
-// C) SALIDA NORMAL
+
 async function marcarSalida(id) {
     if (!confirm("¿Confirmar salida del vehículo?")) return;
     try {
@@ -180,7 +180,7 @@ async function marcarSalida(id) {
     } catch (e) { alert("❌ Error al procesar salida."); }
 }
 
-/* --- 3. FUNCIONALIDAD DE PÉRDIDA --- */
+
 function abrirPerdida(id) {
     const t = ticketsGlobal.find(x => x.ID_TICKET == id);
     if (!t) return;
@@ -210,12 +210,11 @@ function capturarFoto(tipo) {
     const video = document.getElementById("video-feed");
     const imgId = tipo === 'anverso' ? "img-anverso" : "img-reverso";
     const img = document.getElementById(imgId);
-    
+
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
-    
     img.src = canvas.toDataURL('image/jpeg');
     img.style.display = "block";
     if (document.getElementById("placeholder-text")) {
@@ -223,13 +222,11 @@ function capturarFoto(tipo) {
     }
 }
 
-//Generar acta de salida
+
 async function generarActaSalida() {
 const id = document.getElementById("loss-id-ticket").value;
     const foto1 = document.getElementById("img-anverso").src;
     const foto2 = document.getElementById("img-reverso").src;
-    
-    // Capturar nuevos campos
     const telefono = document.getElementById("loss-telefono").value.trim();
     const direccion = document.getElementById("loss-direccion").value.trim();
     const correo = document.getElementById("loss-correo").value.trim();
@@ -256,8 +253,8 @@ const id = document.getElementById("loss-id-ticket").value;
 
         if (res.ok) {
             alert("✅ Acta registrada correctamente. Generando PDF...");
-            
-            // 1. Preparamos los datos para el PDF
+
+
             const datosPDF = {
                 codigo: document.getElementById("loss-codigo").innerText,
                 cliente: document.getElementById("loss-cliente").innerText,
@@ -269,24 +266,18 @@ const id = document.getElementById("loss-id-ticket").value;
                 telefono, direccion, correo, foto1, foto2
             };
 
-            // 2. Generamos el PDF
             imprimirPDFPerdida(datosPDF);
 
-            // 3. Recargar página después de un momento
             setTimeout(() => location.reload(), 2000);
         }
     } catch (e) { alert("❌ Error al procesar pérdida."); }
 }
 
-/* --- NUEVA FUNCIÓN: DISEÑO EXACTO DEL PDF (Pegar al final de dashboard.js) --- */
 
-
-/* --- 4. EXPORTACIÓN Y CORTES --- */
 async function ejecutarCorte(tipo) {
-    // 1. Mensajes personalizados según el tipo
+
     let mensaje = "";
     let tituloReporte = "";
-    
     if (tipo === 'X') {
         mensaje = "⚠️ ¿Realizar CORTE PARCIAL (X)?\n\nSe generará el reporte del turno actual y se cerrará su sesión.";
         tituloReporte = "REPORTE DE OPERACIONES - X (PARCIAL)";
@@ -298,7 +289,7 @@ async function ejecutarCorte(tipo) {
     if (!confirm(mensaje)) return;
 
     try {
-        // 2. Obtener Datos
+
         const [resActivos, resHistorial] = await Promise.all([
             fetch('http://127.0.0.1:3000/api/tickets/activos'),
             fetch('http://127.0.0.1:3000/api/clientes/hoy')
@@ -307,27 +298,22 @@ async function ejecutarCorte(tipo) {
         const activos = await resActivos.json();
         const historial = await resHistorial.json();
 
-        // 3. Calcular Datos de la Sesión
         const fechaHoy = new Date();
-        // Si es Z, asumimos inicio del día (00:00) para el reporte global
-        const inicioTurnoStr = (tipo === 'Z') ? 
-            new Date(fechaHoy.setHours(0,0,0,0)).toISOString() : 
+
+        const inicioTurnoStr = (tipo === 'Z') ?
+            new Date(fechaHoy.setHours(0,0,0,0)).toISOString() :
             (localStorage.getItem("horaInicioTurno") || fechaHoy.toISOString());
-            
+
         const inicioTurno = new Date(inicioTurnoStr);
         const diffMs = new Date() - inicioTurno; // Diferencia real
         const diffHrs = Math.floor((diffMs % 86400000) / 3600000);
         const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
-
-        // Detectar si hubo múltiples operadores (Simulado visualmente)
-        // Nota: Para que salgan los nombres reales de OTROS, el backend debería enviarlos.
-        // Por ahora, pondremos que el reporte incluye "Turno General".
-        const responsable = (tipo === 'Z') ? 
-            `${localStorage.getItem("usuarioNombre")} (Y ANTERIORES)` : 
+        const responsable = (tipo === 'Z') ?
+            `${localStorage.getItem("usuarioNombre")} (Y ANTERIORES)` :
             localStorage.getItem("usuarioNombre");
 
         const datosSesion = {
-            titulo: tituloReporte, // Título dinámico
+            titulo: tituloReporte,
             tipo: tipo,
             responsable: responsable,
             fecha: new Date().toLocaleDateString('es-PE'),
@@ -336,11 +322,10 @@ async function ejecutarCorte(tipo) {
             duracion: (tipo === 'Z') ? "24h (Jornada Completa)" : `${diffHrs}h ${diffMins}m`
         };
 
-        // 4. Generar Reportes
+
         generarPDFProfesional(datosSesion, activos, historial);
         generarExcelProfesional(datosSesion, activos, historial);
 
-        // 5. Cerrar Sesión
         setTimeout(() => {
             alert(`✅ ${tipo === 'Z' ? "Cierre Z" : "Corte X"} generado exitosamente.`);
             localStorage.clear();
@@ -350,15 +335,13 @@ async function ejecutarCorte(tipo) {
     } catch (e) { console.error(e); alert("❌ Error al generar reporte."); }
 }
 
-/* --- GENERADOR PDF (Adaptado para Z) --- */
+
 function generarPDFProfesional(sesion, activos, historial) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    
-    // Si es Z, usamos un ROJO OSCURO para diferenciar. Si es X, AZUL.
-    const colorCabecera = (sesion.tipo === 'Z') ? [127, 29, 29] : [30, 41, 59]; 
-    
-    // 1. Encabezado
+
+    const colorCabecera = (sesion.tipo === 'Z') ? [127, 29, 29] : [30, 41, 59];
+
     doc.setFillColor(...colorCabecera);
     doc.rect(0, 0, 210, 40, 'F');
     doc.setTextColor(255, 255, 255);
@@ -369,14 +352,14 @@ function generarPDFProfesional(sesion, activos, historial) {
     doc.setFont("helvetica", "normal");
     doc.text("AUDITORÍA DE ESTACIONAMIENTO Y CONTROL DE INVENTARIO", 105, 26, null, null, "center");
 
-    // 2. Datos Sesión
+
     doc.setFillColor(241, 245, 249);
     doc.rect(14, 45, 182, 25, 'F');
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
     doc.text("RESUMEN DEL PERIODO", 20, 53);
-    
+
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.text(`RESPONSABLE: ${sesion.responsable.toUpperCase()}`, 20, 60);
@@ -384,7 +367,6 @@ function generarPDFProfesional(sesion, activos, historial) {
     doc.text(`HASTA: ${sesion.fecha}, ${sesion.horaCierre}`, 120, 66);
     doc.text(`TIEMPO OPERATIVO: ${sesion.duracion}`, 120, 60);
 
-    // 3. Tablas (Igual que antes)
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
     doc.text(`A. INVENTARIO EN CUSTODIA (Pasa a mañana: ${activos.length})`, 14, 80);
@@ -395,15 +377,14 @@ function generarPDFProfesional(sesion, activos, historial) {
         head: [['TICKET', 'PROPIETARIO', 'VEHÍCULO', 'INGRESO']],
         body: dataActivos,
         theme: 'striped',
-        headStyles: { fillColor: [22, 163, 74] }, // Verde
+        headStyles: { fillColor: [22, 163, 74] },
         styles: { fontSize: 9 }
     });
 
     let finalY = doc.lastAutoTable.finalY + 15;
     doc.text(`B. HISTORIAL TOTAL DEL DÍA (${historial.length} movimientos)`, 14, finalY);
-    
     const dataHistorial = historial.map(t => [
-        t.ESTADO, t.CODIGO_CORRELATIVO, t.Cliente, 
+        t.ESTADO, t.CODIGO_CORRELATIVO, t.Cliente,
         formatearHora(t.HORA_INGRESO), t.HORA_SALIDA ? formatearHora(t.HORA_SALIDA) : '--'
     ]);
     doc.autoTable({
@@ -411,11 +392,11 @@ function generarPDFProfesional(sesion, activos, historial) {
         head: [['ESTADO', 'TICKET', 'CLIENTE', 'ENTRADA', 'SALIDA']],
         body: dataHistorial,
         theme: 'striped',
-        headStyles: { fillColor: [71, 85, 105] }, // Gris
+        headStyles: { fillColor: [71, 85, 105] },
         styles: { fontSize: 9 }
     });
 
-    // Pie de página con firma
+
     const yFirmas = doc.internal.pageSize.height - 30;
     doc.setDrawColor(150);
     doc.line(70, yFirmas, 140, yFirmas);
@@ -426,11 +407,10 @@ function generarPDFProfesional(sesion, activos, historial) {
     doc.save(`${sesion.tipo}_${sesion.fecha.replace(/\//g,'-')}.pdf`);
 }
 
-/* --- GENERADOR EXCEL (Adaptado) --- */
+
 function generarExcelProfesional(sesion, activos, historial) {
     const wb = XLSX.utils.book_new();
-    
-    // Estilos (Rojo para Z, Azul para X)
+
     const colorBg = (sesion.tipo === 'Z') ? "7F1D1D" : "1E293B";
     const stTitulo = { font: { bold: true, color: { rgb: "FFFFFF" }, sz: 14 }, fill: { fgColor: { rgb: colorBg } }, alignment: { horizontal: "center" } };
     const stHead = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "475569" } }, border: { top: {style:'thin'}, bottom: {style:'thin'} } };
@@ -472,14 +452,12 @@ function generarExcelProfesional(sesion, activos, historial) {
     XLSX.writeFile(wb, `${sesion.tipo}_${sesion.fecha.replace(/\//g,'-')}.xlsx`);
 }
 
-// Botones del HTML
+
 function cerrarSesionBoton() { ejecutarCorte('X'); }
-// Botón de Cerrar Sesión manual (llama a corte X por defecto)
 function cerrarSesionBoton() {
     ejecutarCorte('X');
 }
 
-/* --- 5. BUSCADOR Y MODALES --- */
 function filtrarTabla() {
     const texto = document.getElementById("buscador-principal").value.toLowerCase();
     const filtrados = ticketsGlobal.filter(x => 
@@ -496,7 +474,7 @@ function cerrarModal(id) {
         streamCamara.getTracks().forEach(track => track.stop());
     }
 }
-// initIdentidad DEBE CERRARSE AQUÍ PARA NO "TRAGARSE" LAS OTRAS FUNCIONES
+
 function initIdentidad() {
     const inputDni = document.getElementById("documento-input");
     if (!inputDni) return;
@@ -505,18 +483,17 @@ function initIdentidad() {
         // Limpiamos :1 mientras escribe
         const dniLimpio = limpiarId(e.target.value);
         if (dniLimpio.length === 8) {
-            try { 
+            try {
                 const r = await fetch(`http://127.0.0.1:3000/api/clientes/identidad/DNI/${dniLimpio}`);
-                if (r.ok) { 
-                    const d = await r.json(); 
-                    if (d.nombre) document.getElementById("nombre-cliente").value = d.nombre; 
-                } 
+                if (r.ok) {
+                    const d = await r.json();
+                    if (d.nombre) document.getElementById("nombre-cliente").value = d.nombre;
+                }
             } catch (e) {}
         }
     });
-} // <--- ¡ESTA LLAVE ES LA QUE FALTABA O ESTABA AL FINAL DEL ARCHIVO!
+}
 
-/* --- 6. GESTIÓN DE USUARIOS (GLOBALES AHORA) --- */
 async function abrirModalUsuarios() {
     const modal = document.getElementById("modal-usuarios");
     if(modal) {
@@ -572,7 +549,7 @@ async function eliminarUsuario(id, username) {
     }
 }
 
-/* --- 7. HISTORIAL Y CORTE (GLOBALES AHORA) --- */
+
 async function abrirHistorial() {
     try {
         const res = await fetch("http://127.0.0.1:3000/api/clientes/hoy");
@@ -598,7 +575,7 @@ function renderHistorial(lista) {
         </tr>`).join("");
 }
 
-// Esta función recibe "X" o "Z" y pide confirmación
+
 function cerrarSesionBoton(tipo = 'X') {
     if (confirm(`¿Desea realizar el Corte ${tipo} y cerrar sesión?`)) {
         ejecutarCorte(tipo, true);
@@ -610,8 +587,8 @@ function imprimirPDFPerdida(d) {
     const doc = new jsPDF();
     const fechaHoy = new Date().toLocaleDateString('es-PE');
 
-    // 1. ENCABEZADO (Barra Azul Oscura)
-    doc.setFillColor(30, 41, 59); // Color oscuro
+
+    doc.setFillColor(30, 41, 59);
     doc.rect(0, 0, 210, 25, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
@@ -619,7 +596,6 @@ function imprimirPDFPerdida(d) {
     doc.setFontSize(10);
     doc.text(`EXPEDIENTE: ${d.codigo} | FECHA: ${fechaHoy}`, 105, 19, null, null, "center");
 
-    // 2. SECCIÓN 1: DATOS DEL VEHÍCULO (Tabla)
     doc.setTextColor(0, 0, 0);
     doc.autoTable({
         startY: 35,
@@ -634,7 +610,7 @@ function imprimirPDFPerdida(d) {
         styles: { fontSize: 10 }
     });
 
-    // 3. SECCIÓN 2: DATOS DEL SOLICITANTE (Tabla)
+
     doc.autoTable({
         startY: doc.lastAutoTable.finalY + 10,
         head: [['2. DATOS DEL SOLICITANTE (QUIEN RETIRA)']],
@@ -646,7 +622,7 @@ function imprimirPDFPerdida(d) {
         headStyles: { fillColor: [240, 240, 240], textColor: 50, fontStyle: 'bold' }
     });
 
-    // 4. SECCIÓN 3: EVIDENCIA (Fotos lado a lado)
+
     const yFotos = doc.lastAutoTable.finalY + 15;
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
@@ -657,55 +633,51 @@ function imprimirPDFPerdida(d) {
     doc.text("ROSTRO DEL SOLICITANTE", 50, yFotos + 8, null, null, "center");
     doc.text("DOCUMENTO PRESENTADO", 150, yFotos + 8, null, null, "center");
 
-    // Insertar imágenes (Ancho, Alto) - Ajustado para que entren bien
+
     try {
-        doc.addImage(d.foto2, 'JPEG', 15, yFotos + 12, 80, 60); // Rostro
-        doc.addImage(d.foto1, 'JPEG', 115, yFotos + 12, 80, 60); // DNI
+        doc.addImage(d.foto2, 'JPEG', 15, yFotos + 12, 80, 60);
+        doc.addImage(d.foto1, 'JPEG', 115, yFotos + 12, 80, 60);
     } catch(e) { console.error("Error cargando imagenes al PDF"); }
 
-    // 5. PIE DE PÁGINA LEGAL (Ley 29733)
-    const yFooter = 260; // Parte baja de la hoja
+
+    const yFooter = 260;
     doc.setFontSize(8);
     doc.setTextColor(100);
     doc.text("DECLARACIÓN DE CONFORMIDAD Y PROTECCIÓN DE DATOS:", 14, yFooter);
-    
+
     const textoLegal = `De conformidad con la Ley N° 29733, se deja constancia del registro de imagen y datos personales del solicitante únicamente con fines de seguridad y auditoría.\nEl solicitante declara haber recibido el vehículo en las condiciones descritas y libera al establecimiento de cualquier reclamo posterior.`;
-    
+
     doc.setFont("helvetica", "italic");
     doc.text(textoLegal, 14, yFooter + 6, { maxWidth: 180, align: "justify" });
 
-    // Descargar
+
     doc.save(`Acta_Perdida_${d.codigo}.pdf`);
 }
 
 function filtrarHistorial() {
-    // 1. Capturar lo que escribes (convertido a minúsculas)
+
     const input = document.getElementById("filtro-historial");
-    if (!input) return; // Protección por si no existe el input
-    
+    if (!input) return; 
+
     const texto = input.value.toLowerCase().trim();
 
-    // 2. Filtrar la lista global 'ticketsHistorial'
     const filtrados = ticketsHistorial.filter(t => {
-        // Aseguramos que los campos existan o sean texto vacío ""
+
         const cliente = (t.Cliente || "").toLowerCase();
         const codigo = (t.CODIGO_CORRELATIVO || "").toLowerCase();
         const vehiculo = (t.TIPO_VEHICULO || "").toLowerCase();
-        
-        // Agregamos Marca y Color por si quieres buscar "Monark" aunque no salga en la tabla
+
         const marca = (t.MARCA_BICI || t.marca || "").toLowerCase();
         const color = (t.COLOR_BICI || t.color || "").toLowerCase();
         const estado = (t.ESTADO || "").toLowerCase();
 
-        // 3. Condición: Si el texto está en CUALQUIERA de estos campos, pasa el filtro
-        return cliente.includes(texto) || 
-               codigo.includes(texto) || 
-               vehiculo.includes(texto) || 
-               marca.includes(texto) || 
+        return cliente.includes(texto) ||
+               codigo.includes(texto) ||
+               vehiculo.includes(texto) ||
+               marca.includes(texto) ||
                color.includes(texto) ||
                estado.includes(texto);
     });
 
-    // 4. Volver a pintar la tabla con los resultados filtrados
     renderHistorial(filtrados);
 }

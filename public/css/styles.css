@@ -1,19 +1,18 @@
-/* --- VARIABLES GLOBALES --- */
 :root {
-  --primary: #1e293b;       /* Azul Oscuro (Fondo Header) */
-  --accent: #10b981;        /* Verde (Botones Acción/Badge Activo) */
-  --accent-hover: #059669;  /* Verde Oscuro (Hover) */
-  --warning: #f59e0b;       /* Naranja (Badge Salida) */
-  --danger: #ef4444;        /* Rojo (Eliminar/Pérdida/Badge Perdido) */
-  --info: #3b82f6;          /* Azul (Badge Finalizado) */
-  --light: #f8fafc;         /* Fondo Claro */
-  --border: #e2e8f0;        /* Bordes Suaves */
-  --text-main: #334155;     /* Texto Principal */
-  --text-muted: #64748b;    /* Texto Secundario */
+  --primary: #1e293b;
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  --light: #f8fafc;
+  --border: #e2e8f0;
+  --text-main: #334155;
+  --text-muted: #64748b;
   --white: #ffffff;
 }
 
-/* --- RESET Y BASE --- */
+
 * { box-sizing: border-box; }
 
 body {
@@ -25,36 +24,33 @@ body {
   line-height: 1.5;
 }
 
-/* =========================================
-   ESTILOS ESPECÍFICOS DEL LOGIN (CON WALLPAPER)
-   ========================================= */
+
 .login-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   
-  /* AQUÍ ESTÁ LA MAGIA DEL WALLPAPER */
-  /* El linear-gradient crea una capa oscura al 60% sobre tu foto para que el texto resalte */
+
   background: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.8)), 
               url('../assets/wallpaper-login.png');
   
-  background-size: cover;      /* Asegura que cubra toda la pantalla */
-  background-position: center; /* Centra la imagen */
+  background-size: cover;     
+  background-position: center; 
   background-repeat: no-repeat;
   padding: 20px;
 }
 
-/* Opcional: Efecto de vidrio esmerilado para la tarjeta de login */
+
 .login-card {
-  background: rgba(255, 255, 255, 0.9); /* Un poco transparente */
+  background: rgba(255, 255, 255, 0.9); 
   padding: 2.5rem;
   border-radius: 16px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); /* Sombra más fuerte */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); 
   width: 100%;
   max-width: 400px;
   text-align: center;
-  backdrop-filter: blur(10px); /* Efecto borroso detrás de la tarjeta */
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
@@ -110,7 +106,7 @@ body {
   outline: none;
 }
 
-/* Botón Login */
+
 .btn-login {
   width: 100%;
   padding: 0.85rem;
@@ -129,9 +125,6 @@ body {
   background-color: #334155;
 }
 
-/* =========================================
-   ESTILOS DEL DASHBOARD (HEADER)
-   ========================================= */
 header {
   background: var(--primary);
   color: white;
@@ -182,9 +175,6 @@ header {
 .header-tools button:hover { opacity: 0.9; transform: translateY(-1px); }
 .header-tools button:active { transform: translateY(0); }
 
-/* =========================================
-   DASHBOARD MAIN LAYOUT
-   ========================================= */
 main {
   max-width: 1400px;
   margin: 30px auto;
@@ -210,9 +200,7 @@ h3 {
   gap: 8px;
 }
 
-/* =========================================
-   FORMULARIOS (DASHBOARD)
-   ========================================= */
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsivo automático */
@@ -220,7 +208,7 @@ h3 {
   align-items: end;
 }
 
-/* Ajuste específico para la fila de registro (5 columnas) */
+
 #registro-ingreso .form-grid {
     grid-template-columns: 1fr 2fr 1.5fr 1fr 1fr;
 }
@@ -274,9 +262,7 @@ input:focus, select:focus, textarea:focus {
 
 .btn-primary:hover { background: var(--accent-hover); }
 
-/* =========================================
-   TABLAS
-   ========================================= */
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -307,7 +293,7 @@ td {
 
 tr:hover td { background-color: #fcfcfd; }
 
-/* BADGES (ESTADOS) */
+
 .badge {
   padding: 4px 10px;
   border-radius: 9999px;
@@ -320,17 +306,15 @@ tr:hover td { background-color: #fcfcfd; }
 .badge-finalizado { background-color: #dbeafe; color: #1e40af; }
 .badge-perdido { background-color: #fee2e2; color: #991b1b; }
 
-/* =========================================
-   MODALES
-   ========================================= */
+
 .modal {
-  display: none; /* Oculto por defecto */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(15, 23, 42, 0.7); /* Fondo oscuro semitransparente */
+  background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(4px);
   justify-content: center;
   align-items: center;
@@ -354,9 +338,7 @@ tr:hover td { background-color: #fcfcfd; }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* =========================================
-   ESTILOS ESPECÍFICOS: CÁMARA Y FOTOS
-   ========================================= */
+
 .camera-container {
     display: flex;
     gap: 15px;
@@ -374,7 +356,7 @@ tr:hover td { background-color: #fcfcfd; }
 .video-box video, .photo-preview img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Ajuste para llenar el cuadro */
+    object-fit: cover; 
 }
 .photo-preview {
     background: #f1f5f9;
@@ -384,7 +366,7 @@ tr:hover td { background-color: #fcfcfd; }
     justify-content: center;
 }
 
-/* SCROLLBAR */
+
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }

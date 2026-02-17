@@ -6,7 +6,6 @@
     <title>Panel Operativo</title>
     <link rel="stylesheet" href="../css/styles.css" />
     <style>
-      /* ESTILOS DE ESTADO */
       .badge {
         padding: 5px 10px;
         border-radius: 15px;
@@ -25,7 +24,6 @@
         background-color: #ef4444;
       }
 
-      /* BOTONES DE ACCIÓN */
       .btn-action {
         border: none;
         padding: 6px 10px;
@@ -45,7 +43,6 @@
         background-color: #ef4444;
       }
 
-      /* CÁMARA EN MODAL PÉRDIDA */
       .camera-container {
         display: flex;
         gap: 10px;
@@ -167,6 +164,9 @@
             type="text"
             id="buscador-principal"
             placeholder="🔍 Buscar..."
+            autocomplete="off"
+            readonly
+            onfocus="this.removeAttribute('readonly')"
             oninput="filtrarTabla()"
             style="
               width: 300px;

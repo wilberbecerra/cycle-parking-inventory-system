@@ -113,7 +113,6 @@
 
       document.addEventListener("DOMContentLoaded", () => {
         const user = localStorage.getItem("usuarioNombre");
-        // Verificamos que no sea null ni la palabra "undefined"
         if (user && user !== "undefined") {
           document.getElementById("login-card").style.display = "none";
           document.getElementById("session-card").style.display = "block";
@@ -129,8 +128,6 @@
         if (
           confirm("⚠️ ¿Desea cerrar la sesión actual para cambiar de usuario?")
         ) {
-          // Limpiamos todo antes de ir al dashboard para forzar el corte
-          // Pero enviamos la señal de forceCorteX
           window.location.href = "dashboard.html?forceCorteX=true";
         }
       }
@@ -152,9 +149,6 @@
 
             if (res.ok) {
               const u = data.usuario;
-
-              // --- CORRECCIÓN AQUÍ ---
-              // Buscamos el dato correcto (Backend puede mandar mayúsculas o minúsculas)
               const idReal = u.id || u.ID_USUARIO || u.ID;
               const nombreReal = u.nombre || u.NOMBRE_EMPLEADO || u.NOMBRE;
               const rolReal = u.rol || u.ROL;
