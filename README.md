@@ -39,8 +39,8 @@ A diferencia de los sistemas de parking convencionales, **CyclePark** integra un
 |:-------------------------:|:---------------------------:|:----------------------------:|
 | ![Acta_Perdida](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/acta-de-perdida-de-ticket.jpg) | ![Corte_X](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/corte-x.jpg) | ![Excel](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/excel.png) |
 | *Captura de evidencia fotográfica (Ley 29733)* | *Cortes X/Z generados con diseño empresarial* | *Tablas estilizadas para auditoría financiera* |
-*(Nota: Las imágenes representan el flujo real de trabajo en la sede La Rambla Brasil)*
 
+*(Nota: Las imágenes representan el flujo real de trabajo en la sede La Rambla Brasil)*
 ---
 
 ## 🚀 Key Features | Funcionalidades Clave
