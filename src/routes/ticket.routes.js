@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
 const { getConnection } = require('../config/db');
+const bcrypt = require('bcryptjs');
 
 
 router.get('/activos', async (req, res) => {
@@ -156,21 +157,32 @@ router.post('/anular', async (req, res) => {
     try {
         const pool = await getConnection();
 
-        const adminCheck = await pool.request()
-            .input('pass', sql.VarChar, passAdmin)
-            .query("SELECT TOP 1 NOMBRE_EMPLEADO FROM PRK_USUARIOS WHERE ROL = 'Administrador' AND PASSWORD_HASH = @pass");
+        const adminsResult = await pool.request()
+            .query("SELECT NOMBRE_EMPLEADO, PASSWORD_HASH FROM PRK_USUARIOS WHERE ROL = 'Administrador'");
 
-        if (adminCheck.recordset.length === 0) {
-            return res.status(401).json({ mensaje: 'Autorización Denegada: Contraseña incorrecta o usuario no es Administrador.' });
+        let adminAutorizado = null;
+
+
+        for (const admin of adminsResult.recordset) {
+            const hashGuardado = admin.PASSWORD_HASH;
+
+            const esHashValido = bcrypt.compareSync(passAdmin, hashGuardado);
+            const esTextoPlanoValido = (passAdmin === hashGuardado);
+
+            if (esHashValido || esTextoPlanoValido) {
+                adminAutorizado = admin.NOMBRE_EMPLEADO;
+                break; 
+            }
         }
 
-        const nombreAdmin = adminCheck.recordset[0].NOMBRE_EMPLEADO;
-
+        if (!adminAutorizado) {
+            return res.status(401).json({ mensaje: 'Autorización Denegada: Contraseña incorrecta o usuario no es Administrador.' });
+        }
 
         await pool.request()
             .input('id', sql.Int, idTicket)
             .input('motivo', sql.VarChar, motivo)
-            .input('admin', sql.VarChar, nombreAdmin)
+            .input('admin', sql.VarChar, adminAutorizado)
             .query(`
                 UPDATE PRK_TICKETS
                 SET ESTADO = 'Anulado',
@@ -197,7 +209,7 @@ router.post('/anular', async (req, res) => {
                 WHERE T.ID_TICKET = @id
             `);
 
-        res.json({ 
+        res.json({
             mensaje: 'Anulado con éxito',
             datosAnulacion: ticketData.recordset[0]
         });
