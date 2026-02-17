@@ -1,4 +1,3 @@
-
 let ticketsGlobal = [];
 let ticketsHistorial = [];
 let streamCamara = null;
@@ -11,11 +10,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "login.html";
         return;
     }
-    document.getElementById("nombre-usuario").innerText = nombre;
 
-    if (!localStorage.getItem("horaInicioTurno")) {
-        localStorage.setItem("horaInicioTurno", new Date().toISOString());
+    const elNombre = document.getElementById("nombre-usuario");
+    if (elNombre) {
+        elNombre.innerText = nombre;
+    } else {
+        console.warn("⚠️ Advertencia: No se encontró el elemento 'nombre-usuario' en el HTML.");
     }
+
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('forceCorteX') === 'true') {
+        console.log("🚀 Solicitud de Corte X automático detectada.");
+
+
+        setTimeout(async () => {
+            await ejecutarCorte('X');
+        }, 1000);
+
+        return;
+    }
+
+    if (!localStorage.getItem("inicioTurno")) {
+        localStorage.setItem("inicioTurno", new Date().toISOString());
+    }
+
 
     const rol = localStorage.getItem("usuarioRol");
     if (rol === "Administrador") {
@@ -23,7 +42,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (btn) btn.style.display = "inline-block";
     }
 
-    
     await cargarActivos();
     initIdentidad();
 });
@@ -33,10 +51,10 @@ function formatearHora(isoString) {
     if (!isoString) return "--:--";
     try {
         const fecha = new Date(isoString);
-        return fecha.toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            hour12: true 
+        return fecha.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
         });
     } catch (e) { return isoString; }
 }
@@ -50,7 +68,7 @@ function limpiarId(id) {
 function renderTabla(lista) {
     const tbody = document.getElementById("tickets-body");
     if (!tbody) return;
-    
+
     tbody.innerHTML = lista.map((t) => {
         const horaLimpia = formatearHora(t.HORA_INGRESO);
         const marca = t.MARCA_BICI || t.marca_bici || "-";
@@ -809,4 +827,11 @@ function generarPDFAnulacion(d) {
     doc.text("Este documento certifica la baja del ticket en el sistema de inventario.", 105, 280, null, null, "center");
 
     doc.save(`Anulacion_${d.codigo_ticket}.pdf`);
+}
+
+function bloquearSesion() {
+
+    localStorage.setItem("sesionBloqueada", "true");
+    window.location.href = "login.html";
+
 }

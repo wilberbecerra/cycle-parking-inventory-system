@@ -37,73 +37,92 @@
         </form>
       </div>
 
-      <div
-        id="session-card"
+     <div
+        id="unlock-card"
         class="login-card"
         style="display: none; text-align: center"
       >
-        <div class="login-header">
-          <img
-            src="../assets/logo-login.png"
-            alt="Logo"
-            class="logo"
-            style="width: 80px; margin-bottom: 10px"
-          />
-          <h3 style="color: #10b981; margin: 0">¡Sesión Activa!</h3>
+        <div class="login-header" style="display: flex; flex-direction: column; align-items: center;">
+          <div style="font-size: 3rem; margin-bottom: 10px">🔐</div>
+          <h3 style="color: #334155; margin: 0; text-align: center">Sesión Bloqueada</h3>
+          <p style="text-align: center">Ingrese su contraseña para continuar</p>
         </div>
 
         <div
           style="
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 12px;
-            margin: 20px 0;
-            border: 1px solid #e2e8f0;
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
           "
         >
-          <p
-            style="
-              margin: 0;
-              color: #64748b;
-              font-size: 0.9rem;
-              font-weight: 500;
-            "
+          <small
+            style="color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;"
+            >Usuario Activo</small
           >
-            Usuario conectado actualmente:
-          </p>
-          <h2
-            id="active-user"
-            style="margin: 5px 0; color: #1e293b; font-size: 1.5rem"
-          >
+          <h3 id="locked-user-name" style="margin: 8px auto; color: #0f172a; width: 100%; text-align: center; display: block;">
             ...
-          </h2>
+          </h3>
+          <div style="background: #e2e8f0; padding: 2px 10px; border-radius: 12px;">
+             <small id="locked-user-username" style="color: #475569; font-family: monospace; font-size: 0.9rem;">...</small>
+          </div>
         </div>
 
-        <button
-          onclick="continuarSesion()"
-          class="btn-login"
-          style="margin-bottom: 15px; background-color: #10b981"
-        >
-          ➡ Continuar Trabajando
-        </button>
+        <form id="unlock-form">
+          <div class="input-group" style="text-align: left">
+            <label>Contraseña</label>
+            <input
+              type="password"
+              id="unlock-password"
+              placeholder="••••••"
+              required
+              autofocus
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn-login"
+            style="background-color: #f59e0b"
+          >
+            🔓 Desbloquear
+          </button>
+        </form>
+
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0" />
 
         <button
-          onclick="cambiarCuenta()"
+          onclick="cerrarSesionCompleta()"
           style="
-            width: 100%;
-            padding: 12px;
-            background: white;
-            border: 2px solid #ef4444;
+            background: none;
+            border: none;
             color: #ef4444;
-            border-radius: 8px;
-            font-weight: bold;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s;
+            text-decoration: underline;
           "
-          onmouseover="this.style.background = '#fff1f2'"
-          onmouseout="this.style.background = 'white'"
         >
-          🔒 Cerrar y Cambiar (Corte X)
+          No soy este usuario (Cerrar Sesión)
+        </button>
+      </div>
+
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0" />
+
+        <button
+          onclick="cerrarSesionCompleta()"
+          style="
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: underline;
+          "
+        >
         </button>
       </div>
     </div>
@@ -111,63 +130,97 @@
     <script>
       const API_URL = "http://127.0.0.1:3000/api/auth/login";
 
+
       document.addEventListener("DOMContentLoaded", () => {
-        const user = localStorage.getItem("usuarioNombre");
-        if (user && user !== "undefined") {
-          document.getElementById("login-card").style.display = "none";
-          document.getElementById("session-card").style.display = "block";
-          document.getElementById("active-user").innerText = user;
+        const isLocked = localStorage.getItem("sesionBloqueada") === "true";
+        const nombre = localStorage.getItem("usuarioNombre");
+        const username = localStorage.getItem("usuarioUser");
+
+        if (isLocked && nombre && username) {
+          mostrarDesbloqueo(nombre, username);
+        } else {
+          localStorage.removeItem("sesionBloqueada");
+          document.getElementById("login-card").style.display = "block";
+          document.getElementById("unlock-card").style.display = "none";
         }
       });
 
-      function continuarSesion() {
-        window.location.href = "dashboard.html";
+      function mostrarDesbloqueo(nombre, username) {
+        document.getElementById("login-card").style.display = "none";
+        document.getElementById("unlock-card").style.display = "block";
+
+        document.getElementById("locked-user-name").innerText = nombre;
+        document.getElementById("locked-user-username").innerText = username;
+
+        setTimeout(
+          () => document.getElementById("unlock-password").focus(),
+          100,
+        );
       }
 
-      function cambiarCuenta() {
-        if (
-          confirm("⚠️ ¿Desea cerrar la sesión actual para cambiar de usuario?")
-        ) {
-          window.location.href = "dashboard.html?forceCorteX=true";
-        }
-      }
+      function cerrarSesionCompleta() {
+    if (confirm("⚠️ ¿Desea realizar el CORTE X (Reporte de Turno) antes de cambiar de usuario?")) {
+
+        window.location.href = "dashboard.html?forceCorteX=true";
+    }
+}
 
       document
         .getElementById("login-form")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
-          const user = document.getElementById("username").value;
-          const pass = document.getElementById("password").value;
-
-          try {
-            const res = await fetch(API_URL, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ username: user, password: pass }),
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-              const u = data.usuario;
-              const idReal = u.id || u.ID_USUARIO || u.ID;
-              const nombreReal = u.nombre || u.NOMBRE_EMPLEADO || u.NOMBRE;
-              const rolReal = u.rol || u.ROL;
-
-              // Guardamos en LocalStorage
-              localStorage.setItem("usuarioId", idReal);
-              localStorage.setItem("usuarioNombre", nombreReal);
-              localStorage.setItem("usuarioRol", rolReal);
-              localStorage.setItem("inicioTurno", new Date().toISOString());
-
-              window.location.href = "dashboard.html";
-            } else {
-              alert("❌ " + (data.mensaje || "Credenciales incorrectas"));
-            }
-          } catch (error) {
-            console.error(error);
-            alert("Error de conexión con el servidor");
-          }
+          const u = document.getElementById("username").value;
+          const p = document.getElementById("password").value;
+          await autenticar(u, p, false);
         });
+
+      document
+        .getElementById("unlock-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const u = localStorage.getItem("usuarioUser");
+          const p = document.getElementById("unlock-password").value;
+          await autenticar(u, p, true);
+        });
+
+      async function autenticar(username, password, esDesbloqueo) {
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            const u = data.usuario;
+
+            localStorage.setItem("usuarioId", u.id || u.ID_USUARIO);
+            localStorage.setItem(
+              "usuarioNombre",
+              u.nombre || u.NOMBRE_EMPLEADO,
+            );
+            localStorage.setItem("usuarioUser", username);
+            localStorage.setItem("usuarioRol", u.rol || u.ROL);
+
+            if (!esDesbloqueo) {
+              localStorage.setItem("inicioTurno", new Date().toISOString());
+            }
+
+            localStorage.removeItem("sesionBloqueada");
+
+            window.location.href = "dashboard.html";
+          } else {
+            alert("❌ Contraseña incorrecta");
+            if (esDesbloqueo)
+              document.getElementById("unlock-password").value = "";
+          }
+        } catch (error) {
+          console.error(error);
+          alert("❌ Error de conexión");
+        }
+      }
     </script>
   </body>
 </html>

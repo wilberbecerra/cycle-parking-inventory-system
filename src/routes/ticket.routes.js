@@ -171,7 +171,7 @@ router.post('/anular', async (req, res) => {
 
             if (esHashValido || esTextoPlanoValido) {
                 adminAutorizado = admin.NOMBRE_EMPLEADO;
-                break; 
+                break;
             }
         }
 
