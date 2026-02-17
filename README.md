@@ -32,7 +32,7 @@ El flujo de trabajo replica fielmente la operación real de un centro comercial:
 ### 🚲 Operación y Control de Bajas
 | Panel de Control (Dashboard) | Protocolo de Anulación | Acta de Anulación (PDF) |
 |:----------------------------:|:----------------------:|:-----------------------:|
-| ![Dashboard](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/b6ec7dc788847561559c1eecd31ff26d000686dd/public/assets/dashboard.jpg) | ![Protocolo_Anulacion](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/60e5b791ed632d27ff02d654542eb218d705d05b/public/assets/protocolo-de-anulacion.jpg) | ![Acta_Anulacion](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/60e5b791ed632d27ff02d654542eb218d705d05b/public/assets/acta-de-entrega-por-perdida-de-ticket.jpg) |
+| ![Dashboard](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/54d8917e8462e1994054852bf858de97fa5d93dc/public/assets/dashboard-principal.jpg) | ![Protocolo_Anulacion](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/60e5b791ed632d27ff02d654542eb218d705d05b/public/assets/protocolo-de-anulacion.jpg) | ![Acta_Anulacion](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/60e5b791ed632d27ff02d654542eb218d705d05b/public/assets/acta-de-entrega-por-perdida-de-ticket.jpg) |
 | *Control de aforo y tickets activos en tiempo real* | *Verificación administrativa híbrida (Bcrypt/Plain)* | *Registro legal de baja de inventario* |
 
 ### 🚨 Protocolos Legales y Auditoría
