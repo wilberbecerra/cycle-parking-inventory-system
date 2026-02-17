@@ -29,17 +29,25 @@ El flujo de trabajo replica fielmente la operación real de un centro comercial:
 | ![Image_Alt](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/login.jpg) | ![Image_Alt](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/gesti%C3%B3n-usuarios.jpg) |
 | *Inicio de sesión con validación de credenciales* | *Panel exclusivo para **Administradores** (Crear/Borrar empleados)* |
 
-### 🚲 Operación Diaria y Legal
-| Panel de Control (Dashboard) | Protocolo Legal de Pérdida |
-|:----------------------------:|:--------------------------:|
-| ![Image_Alt](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/b6ec7dc788847561559c1eecd31ff26d000686dd/public/assets/dashboard.jpg) | ![Image_Alt](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/acta-de-perdida-de-ticket.jpg) |
-| *Control de aforo y tickets activos en tiempo real* | *Evidencia fotográfica y datos de contacto (Ley 29733)* |
+## 📸 Galería de la Interfaz (Screenshots)
 
-### 📊 Reportes y Auditoría (Financial Exports)
-| Reportes Corporativos (PDF) | Exportación de Datos (Excel) |
-|:---------------------------:|:----------------------------:|
-| ![Image_Alt](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/corte-x.jpg) | ![Image_Alt](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/excel.png) |
-| *Cortes X/Z generados con diseño empresarial* | *Tablas estilizadas para contabilidad y auditoría* |
+### 🔐 Seguridad y Continuidad
+| Acceso Seguro (Login) | Sesión Bloqueada (Lock) | Gestión de Usuarios (RBAC) |
+|:---------------------:|:--------------------------:|:--------------------------:|
+| ![Login](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/login.jpg) | ![Sesion_Bloqueada](URL_DE_TU_IMAGEN_BLOQUEO) | ![Usuarios](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/gesti%C3%B3n-usuarios.jpg) |
+| *Inicio de sesión con validación de credenciales* | *Protección de contexto de turno y bloqueo de UI* | *Panel exclusivo para **Administradores*** |
+
+### 🚲 Operación y Control de Bajas
+| Panel de Control (Dashboard) | Protocolo de Anulación | Acta de Anulación (PDF) |
+|:----------------------------:|:----------------------:|:-----------------------:|
+| ![Dashboard](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/b6ec7dc788847561559c1eecd31ff26d000686dd/public/assets/dashboard.jpg) | ![Protocolo_Anulacion](URL_DE_TU_IMAGEN_ANULACION) | ![Acta_Anulacion](URL_DE_TU_IMAGEN_ACTA_PDF) |
+| *Control de aforo y tickets activos en tiempo real* | *Verificación administrativa híbrida (Bcrypt/Plain)* | *Registro legal de baja de inventario* |
+
+### 🚨 Protocolos Legales y Auditoría
+| Acta de Pérdida de Ticket | Reportes Corporativos (PDF) | Exportación de Datos (Excel) |
+|:-------------------------:|:---------------------------:|:----------------------------:|
+| ![Acta_Perdida](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/acta-de-perdida-de-ticket.jpg) | ![Corte_X](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/corte-x.jpg) | ![Excel](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/excel.png) |
+| *Captura de evidencia fotográfica (Ley 29733)* | *Cortes X/Z generados con diseño empresarial* | *Tablas estilizadas para auditoría financiera* |
 
 *(Nota: Las imágenes representan el flujo real de trabajo en la sede La Rambla Brasil)*
 
@@ -47,12 +55,11 @@ El flujo de trabajo replica fielmente la operación real de un centro comercial:
 
 ## 🚀 Key Features | Funcionalidades Clave
 
-* **Free-Tier Logic Optimization:** Arquitectura optimizada para flujos de alta velocidad sin pasarelas de pago, ideal para Centros Comerciales, Universidades o Edificios Corporativos donde el estacionamiento es un beneficio gratuito.
-* **Real-time Inventory & Monitoring:** Visualización instantánea de vehículos en custodia (Activos) y capacidad de búsqueda dinámica (Live Search) por cliente, vehículo o código.
-* **Relational Data Integrity:** Edición avanzada de registros que sincroniza automáticamente la información entre entidades (`Clientes` y `Tickets`) asegurando la consistencia de la base de datos SQL.
-* **Legal Security Protocol:** Módulo especializado para "Pérdida de Ticket" que captura evidencia fotográfica (Webcam Integration), datos de contacto y genera un Acta Legal en PDF lista para firmar.
-* **Audit & Financial Reports:** Generación de cortes de turno (**Corte X**) y cierre fiscal (**Corte Z**) exportables en **PDF** y **Excel** estilizado, incluyendo cálculo automático de tiempos y responsables.
-* **Timezone Synchronization:** Manejo preciso de tiempos (UTC/Local) para evitar desfases en los registros de ingreso/salida.
+* **Hybrid Security Verification:** Implementación de un algoritmo de validación inteligente que permite la convivencia de credenciales legacy (texto plano) con estándares modernos de encriptación (**Bcrypt**). Esto facilita una transición de seguridad transparente para el personal sin interrumpir la operatividad del sistema.
+* **Shift Continuity & Context Persistence:** Mecanismo de persistencia de contexto diseñado para asegurar la integridad de los datos críticos del turno (como la hora de inicio). Este sistema evita la pérdida de información ante bloqueos accidentales de pantalla, cierres de navegador o cambios de usuario forzados.
+* **Real-time Inventory & Monitoring:** Visualización instantánea de vehículos en custodia y capacidad de búsqueda dinámica (Live Search) sincronizada con la base de datos SQL Server.
+* **Legal Security Protocol:** Módulo de "Pérdida de Ticket" con integración de hardware (Webcam) para captura de evidencia fotográfica y generación de actas legales en PDF bajo la Ley N° 29733.
+* **Automated Audit Reports:** Generación automatizada de reportes de auditoría (Corte X y Corte Z) en formatos PDF y Excel estilizado, activados por eventos de cierre de sesión o cambio de guardia.
 
 ---
 
