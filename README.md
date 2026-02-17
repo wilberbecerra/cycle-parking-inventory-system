@@ -34,13 +34,13 @@ El flujo de trabajo replica fielmente la operación real de un centro comercial:
 ### 🔐 Seguridad y Continuidad
 | Acceso Seguro (Login) | Sesión Bloqueada (Lock) | Gestión de Usuarios (RBAC) |
 |:---------------------:|:--------------------------:|:--------------------------:|
-| ![Login](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/login.jpg) | ![Sesion_Bloqueada](URL_DE_TU_IMAGEN_BLOQUEO) | ![Usuarios](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/gesti%C3%B3n-usuarios.jpg) |
+| ![Login](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/login.jpg) | ![Sesion_Bloqueada](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/60e5b791ed632d27ff02d654542eb218d705d05b/public/assets/sesion-bloqueada.jpg) | ![Usuarios](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/gesti%C3%B3n-usuarios.jpg) |
 | *Inicio de sesión con validación de credenciales* | *Protección de contexto de turno y bloqueo de UI* | *Panel exclusivo para **Administradores*** |
 
 ### 🚲 Operación y Control de Bajas
 | Panel de Control (Dashboard) | Protocolo de Anulación | Acta de Anulación (PDF) |
 |:----------------------------:|:----------------------:|:-----------------------:|
-| ![Dashboard](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/b6ec7dc788847561559c1eecd31ff26d000686dd/public/assets/dashboard.jpg) | ![Protocolo_Anulacion](URL_DE_TU_IMAGEN_ANULACION) | ![Acta_Anulacion](URL_DE_TU_IMAGEN_ACTA_PDF) |
+| ![Dashboard](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/b6ec7dc788847561559c1eecd31ff26d000686dd/public/assets/dashboard.jpg) | ![Protocolo_Anulacion](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/60e5b791ed632d27ff02d654542eb218d705d05b/public/assets/protocolo-de-anulacion.jpg) | ![Acta_Anulacion](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/60e5b791ed632d27ff02d654542eb218d705d05b/public/assets/acta-de-entrega-por-perdida-de-ticket.jpg) |
 | *Control de aforo y tickets activos en tiempo real* | *Verificación administrativa híbrida (Bcrypt/Plain)* | *Registro legal de baja de inventario* |
 
 ### 🚨 Protocolos Legales y Auditoría
