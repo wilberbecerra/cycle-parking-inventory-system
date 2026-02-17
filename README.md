@@ -26,19 +26,19 @@ El flujo de trabajo replica fielmente la operación real de un centro comercial:
 ### 🔐 Seguridad y Administración
 | Acceso Seguro (Login) | Gestión de Usuarios (RBAC) |
 |:---------------------:|:--------------------------:|
-| ![Login Screen]([https://via.placeholder.com/400x220?text=Login+Screen](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/login.jpg)) | ![Admin Panel]([https://via.placeholder.com/400x220?text=User+Management](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/gesti%C3%B3n-usuarios.jpg)) |
+| ![Image_Alt]([https://via.placeholder.com/400x220?text=Login+Screen](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/login.jpg)) | ![Image_Alt]([https://via.placeholder.com/400x220?text=User+Management](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/gesti%C3%B3n-usuarios.jpg)) |
 | *Inicio de sesión con validación de credenciales* | *Panel exclusivo para **Administradores** (Crear/Borrar empleados)* |
 
 ### 🚲 Operación Diaria y Legal
 | Panel de Control (Dashboard) | Protocolo Legal de Pérdida |
 |:----------------------------:|:--------------------------:|
-| ![Dashboard]([https://via.placeholder.com/400x220?text=Dashboard+Activos](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/dashboard.jpg)) | ![Modal Perdida]([https://via.placeholder.com/400x220?text=Acta+de+Perdida](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/acta-de-perdida-de-ticket.jpg)) |
+| ![Image_Alt]([https://via.placeholder.com/400x220?text=Dashboard+Activos](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/dashboard.jpg)) | ![Image_Alt]([https://via.placeholder.com/400x220?text=Acta+de+Perdida](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/acta-de-perdida-de-ticket.jpg)) |
 | *Control de aforo y tickets activos en tiempo real* | *Evidencia fotográfica y datos de contacto (Ley 29733)* |
 
 ### 📊 Reportes y Auditoría (Financial Exports)
 | Reportes Corporativos (PDF) | Exportación de Datos (Excel) |
 |:---------------------------:|:----------------------------:|
-| ![Reporte PDF]([https://via.placeholder.com/400x220?text=Reporte+Corte+Z+PDF](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/corte-x.jpg)) | ![Reporte Excel]([https://via.placeholder.com/400x220?text=Excel+Export](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/excel.png)) |
+| ![Image_Alt]([https://via.placeholder.com/400x220?text=Reporte+Corte+Z+PDF](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/corte-x.jpg)) | ![Image_Alt]([https://via.placeholder.com/400x220?text=Excel+Export](https://github.com/wilberbecerra/cycle-parking-inventory-system/blob/73f48f55968cbe803cac92b064eaefad985d28ed/public/assets/excel.png)) |
 | *Cortes X/Z generados con diseño empresarial* | *Tablas estilizadas para contabilidad y auditoría* |
 
 *(Nota: Las imágenes representan el flujo real de trabajo en la sede La Rambla Brasil)*
