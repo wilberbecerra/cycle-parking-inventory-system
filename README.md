@@ -45,11 +45,11 @@ A diferencia de los sistemas de parking convencionales, **CyclePark** integra un
 
 ## 🚀 Key Features | Funcionalidades Clave
 
-* **Smart Thermal Ticketing:** Motor de impresión personalizado que genera tickets PDF optimizados para impresoras térmicas (80mm), ajustando dinámicamente la longitud del papel según la normativa legal vigente.
-* **Hybrid Security Verification:** Algoritmo de validación que permite la convivencia de credenciales legacy y encriptación **Bcrypt**, facilitando la transición de seguridad sin interrumpir la operación.
-* **Shift Continuity:** Mecanismo de persistencia que protege la integridad de los datos del turno ante bloqueos de pantalla o recargas accidentales.
-* **Legal Security Protocol:** Módulo de "Pérdida de Ticket" con integración de Webcam para captura de evidencia y generación de actas legales.
-* **Automated Audit Reports:** Generación automática de reportes financieros (Corte X/Z) en PDF y Excel al finalizar el turno.
+* **Emisión Térmica Inteligente:** Motor de impresión personalizado que genera tickets PDF optimizados para impresoras térmicas (80mm), ajustando dinámicamente la longitud del papel según la normativa legal vigente.
+* **Verificación de Seguridad Híbrida:** Algoritmo de validación que permite la convivencia de credenciales legacy y encriptación **Bcrypt**, facilitando la transición de seguridad sin interrumpir la operación.
+* **Continuidad de Turno:** Mecanismo de persistencia que protege la integridad de los datos del turno ante bloqueos de pantalla o recargas accidentales.
+* **Protocolo Legal de Seguridad:** Módulo de "Pérdida de Ticket" con integración de Webcam para captura de evidencia y generación de actas legales.
+* **Reportes de Auditoría Automatizados:** Generación automática de reportes financieros (Corte X/Z) en PDF y Excel al finalizar el turno.
 ---
 
 ## 🛠️ Tech Stack | Tecnologías
@@ -58,7 +58,8 @@ A diferencia de los sistemas de parking convencionales, **CyclePark** integra un
 * **Database:** Microsoft SQL Server (Transact-SQL).
 * **Frontend:** HTML5, CSS3 (Modern Flexbox/Grid), Vanilla JavaScript (ES6+).
 * **Architecture:** MVC (Model-View-Controller) / 3-Capas.
-* **Librerías Clave:** * `jspdf` & `jspdf-autotable` (Generación de PDF).
+* **Librerías Clave:**
+    * `jspdf` & `jspdf-autotable` (Generación de PDF).
     * `xlsx-js-style` (Reportes Excel con estilos).
     * `mssql` (Driver SQL Server).
     * `bcryptjs` (Seguridad y Hashing).
